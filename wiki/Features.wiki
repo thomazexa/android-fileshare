@@ -1,4 +1,4 @@
-#summary Features
+#summary Implemented Feature list
 
    * Multiple shared folders
    * Multi-threaded web server allows multiple file browsing and file downloading
