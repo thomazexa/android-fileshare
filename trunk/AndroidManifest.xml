@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.google.fileshare">
+    
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"></uses-permission>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"></uses-permission>
+    
+    <application android:icon="@drawable/folder" android:label="@string/app_name" >
+    
+    	<activity android:name="FileShare" android:label="@string/app_name" >
+        	<intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        
+        
+      	<activity android:name="FileBrowser" android:label="FileBrowser">
+        	<intent-filter>
+          		<action android:name="android.intent.action.GET_CONTENT" />
+		        <action android:name="android.intent.action.VIEW" />
+		        <category android:name="android.intent.category.DEFAULT" />
+		        <category android:name="android.intent.category.OPENABLE" />
+		        <data android:mimeType="vnd.android.cursor.item/vnd.navjagpal.file" />
+		        <data android:mimeType="vnd.android.cursor.dir/vnd.navjagpal.file" />
+        </intent-filter>
+      </activity>  
+    
+
+      <activity android:name="SharedFolderBrowser" android:label="Folder Browser">
+      	<intent-filter>
+        	<category android:name="android.intent.category.DEFAULT" />
+          	<action android:name="android.intent.action.PICK" />
+          	<data android:mimeType="vnd.android.cursor.item/vnd.navjagpal.sharedfolder" />
+        </intent-filter>
+        <intent-filter>
+         	<action android:name="android.intent.action.MAIN" />
+          	<category android:name="android.intent.category.DEFAULT" />
+          	<data android:mimeType="vnd.android.cursor.dir/vnd.navjagpal.sharedfolder" />
+        </intent-filter>
+      </activity>  
+      
+      <activity android:name="SharedFolderDeleter" android:label="Delete Folder">
+        <intent-filter>
+          <category android:name="android.intent.category.DEFAULT" />
+          <action android:name="android.intent.action.DELETE" />
+          <data android:mimeType="vnd.android.cursor.item/vnd.navjagpal.sharedfolder" />
+        </intent-filter>
+      </activity>
+      
+      <activity android:name="SharedFolderCreator" android:label="Create Folder">
+      	<intent-filter>
+        	<category android:name="android.intent.category.DEFAULT" />
+          	<action android:name="android.intent.action.INSERT" />
+          	<data android:mimeType="vnd.android.cursor.dir/vnd.navjagpal.sharedfolder" />
+        </intent-filter>
+      </activity>
+      
+      <activity android:name="SharedFileBrowser" android:label="File Browser">
+      	<intent-filter>
+        	<category android:name="android.intent.category.DEFAULT" />
+          	<action android:name="android.intent.action.VIEW" />
+          	<data android:mimeType="vnd.android.cursor.item/vnd.navjagpal.sharedfolder" />
+        </intent-filter>
+      </activity>
+      
+      <activity android:name="Help" android:label="Help">
+      	<intent-filter>
+        	<category android:name="android.intent.category.DEFAULT" />
+          	<action android:name="android.intent.action.MAIN"/>
+        </intent-filter>
+      </activity>
+      
+      
+      
+      
+      <provider android:name="FileProvider" android:authorities="com.navjagpal.filesharer.FileProvider"
+       android:exported="true" />
+       
+      <provider android:name="FileSharingProvider" android:authorities="com.navjagpal.filesharer.FileSharingProvider"
+       android:exported="true" />
+       
+      <service android:enabled="true" android:permission="android.permission.INTERNET" android:name="FileSharingService" android:exported="true">
+      	<intent-filter>
+        	<action android:name="com.navjagpal.filesharer.IFileSharingService"/>
+       	</intent-filter>
+      </service>
+      
+</application>
+
+</manifest> 
