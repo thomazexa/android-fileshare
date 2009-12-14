@@ -38,6 +38,7 @@ public class SharedFolderBrowser extends ListActivity {
 
 	private static final int MENU_DELETE = 0;
 	private static final int MENU_CREATE = 1;
+	private static final int MENU_SHARE_URL = 2;
 	
 	@Override
 	public void onCreate(Bundle icicle) {
@@ -151,6 +152,9 @@ public class SharedFolderBrowser extends ListActivity {
 
 		// Add a menu item to delete the folder
 		menu.add(0, MENU_DELETE, 0, R.string.delete);
+		
+		// Add a menu item to share a URL to the folder.
+		menu.add(0, MENU_SHARE_URL, 0, R.string.share_url);
 	}
 
 	@Override
@@ -164,18 +168,32 @@ public class SharedFolderBrowser extends ListActivity {
 		}
 
 		switch (item.getItemId()) {
-		case MENU_DELETE: {
-			// Delete the note that the context menu is for
-			Intent deleteIntent = new Intent();
-			deleteIntent.setAction(Intent.ACTION_DELETE);
-			deleteIntent.setData(Uri.withAppendedPath(FileSharingProvider.Folders.CONTENT_URI, "" + info.id));
-			startActivity(deleteIntent);
-			return true;
-		}
+			case MENU_DELETE: {
+				// Delete the note that the context menu is for
+				Intent deleteIntent = new Intent();
+				deleteIntent.setAction(Intent.ACTION_DELETE);
+				deleteIntent.setData(Uri.withAppendedPath(FileSharingProvider.Folders.CONTENT_URI, "" + info.id));
+				startActivity(deleteIntent);
+				return true;
+			}
+			case MENU_SHARE_URL: {
+				Intent shareURLIntent = new Intent();
+    		shareURLIntent.setAction(Intent.ACTION_SEND);
+    		shareURLIntent.setType("text/plain");
+    		shareURLIntent.putExtra(Intent.EXTRA_TEXT, getShareURL(info.id));
+    		Intent chooserIntent = Intent.createChooser(
+             		shareURLIntent, getText(R.string.shareurl_title));
+        startActivity(chooserIntent);
+				return true;
+			}
 		}
 		return false;
 	}
 
+	public String getShareURL(long folderId) {
+		return "http://" + FileShare.getIPAddress(this) + ":9999" +
+		       "/folder/" + folderId;
+	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {

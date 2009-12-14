@@ -85,7 +85,7 @@ public class FileShare extends Activity {
         /* Setup the status text */
         TextView ipTextView = (TextView) findViewById(R.id.url);
         //ipTextView.setText(getText(R.string.unknown_ipaddress));
-        ipTextView.setText("http://" + getIPAddress() + ":9999");
+        ipTextView.setText("http://" + getIPAddress(this) + ":9999");
   
         /* Help button */
         Button helpButton = (Button) findViewById(R.id.help);
@@ -95,8 +95,7 @@ public class FileShare extends Activity {
         		helpIntent.setClass(FileShare.this, Help.class);
         		startActivity(helpIntent);
         	}
-        });
-        
+        });   
     }
 
 
@@ -127,8 +126,8 @@ public class FileShare extends Activity {
 		FileSharingProvider.addFileToFolder(getContentResolver(), file, folder);	
 	}
 	
-	private String getIPAddress() {
-		WifiManager wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+	public static String getIPAddress(Context context) {
+		WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
 		android.net.wifi.WifiInfo info = wifiManager.getConnectionInfo();
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		DataOutputStream dos = new DataOutputStream(bos);

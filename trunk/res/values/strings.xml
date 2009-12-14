@@ -26,4 +26,6 @@
     <b>How do I turn off/on the service?</b>\nThe sharing service is automatically started when the File Share application is
     first started. The ability to turn on/off the service will be available in a future release.</string>
     
+<string name="share_url">Share URL</string>
+<string name="shareurl_title">Share</string>
 </resources>

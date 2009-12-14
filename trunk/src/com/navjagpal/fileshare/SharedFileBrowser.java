@@ -30,10 +30,14 @@ import android.widget.AdapterView;
 import android.widget.ListAdapter;
 import android.widget.SimpleCursorAdapter;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
 public class SharedFileBrowser extends ListActivity {
 	
 	private static final String TAG = "FileShareFilePicker";
 	private static final int MENU_DELETE = 0;
+	private static final int MENU_SHARE_URL = 1;
 
 	@Override
 	public void onCreate(Bundle icicle) {
@@ -115,6 +119,9 @@ public class SharedFileBrowser extends ListActivity {
 
 		// Add a menu item to delete the folder
 		menu.add(0, MENU_DELETE, 0, R.string.delete);
+		
+		// Add a menu item to share a link to the folder.
+		menu.add(0, MENU_SHARE_URL, 0, R.string.share_url);
 	}
 	
 	@Override
@@ -128,12 +135,43 @@ public class SharedFileBrowser extends ListActivity {
 		}
 
 		switch (item.getItemId()) {
-		case MENU_DELETE: {
-			deleteSharedFile(info.id);
-			return true;
-		}
+			case MENU_DELETE: {
+				deleteSharedFile(info.id);
+				return true;
+			}
+			case MENU_SHARE_URL: {
+				Intent shareURLIntent = new Intent();
+    		shareURLIntent.setAction(Intent.ACTION_SEND);
+    		shareURLIntent.setType("text/plain");
+    		shareURLIntent.putExtra(Intent.EXTRA_TEXT, getShareURL(info.id));
+    		Intent chooserIntent = Intent.createChooser(
+             		shareURLIntent, getText(R.string.shareurl_title));
+        startActivity(chooserIntent);
+				return true;
+			}
 		}
 		return false;
+	}
+	
+	public String getShareURL(long fileId) {
+		String where = FileSharingProvider.Files.Columns._ID + "=" + fileId;
+		Cursor c = getContentResolver().query(
+				FileSharingProvider.Files.CONTENT_URI,
+				new String[] {FileSharingProvider.Files.Columns.DISPLAY_NAME},
+				where, null, null);
+		c.moveToFirst();
+		String encodedName = "";
+		
+		// This really shouldn't happen, but if it does, we can just skip
+		// the name since the web server depends on the id, not the name.
+		try {
+			encodedName = URLEncoder.encode(c.getString(0), "UTF8");
+		} catch (UnsupportedEncodingException e) {
+			Log.e(TAG, "Problem encoding display name " + c.getString(0));
+		}
+		
+		return "http://" + FileShare.getIPAddress(this) + ":9999" +
+		       "/file/" + fileId + "/" + encodedName;
 	}
 
 	@Override
