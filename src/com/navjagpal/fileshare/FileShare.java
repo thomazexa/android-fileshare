@@ -26,6 +26,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
@@ -92,11 +95,12 @@ public class FileShare extends Activity {
 
     /* Preferences button */
     Button preferencesButton = (Button) findViewById(R.id.preferences);
+    final SharedPreferences sharedPreferences = getSharedPreferences(
+        FileSharingService.PREFS_NAME, MODE_PRIVATE);
     preferencesButton.setOnClickListener(new View.OnClickListener() {
       public void onClick(View v) {
         AlertDialog.Builder builder = new AlertDialog.Builder(FileShare.this);
-        final SharedPreferences sharedPreferences = getSharedPreferences(
-            FileSharingService.PREFS_NAME, MODE_PRIVATE);
+       
         builder.setTitle("Preferences");
         builder.setMultiChoiceItems(
             new CharSequence[] {"Allow Uploads"},
@@ -125,7 +129,24 @@ public class FileShare extends Activity {
         helpIntent.setClass(FileShare.this, Help.class);
         startActivity(helpIntent);
       }
-    });   
+    });
+    
+    /* Display a "What's New" dialog if necessary. */
+    PackageManager pm = getPackageManager();
+    try {
+      PackageInfo pi = pm.getPackageInfo("com.navjagpal.fileshare", 0);
+      if (!sharedPreferences.getBoolean(pi.versionName, false)) {
+        sharedPreferences.edit().putBoolean(pi.versionName, true).commit();
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("What's New");
+        builder.setMessage(R.string.whats_new);
+        builder.setPositiveButton("OK", null);
+        builder.show();
+      }
+    } catch (NameNotFoundException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
   }
 
 
