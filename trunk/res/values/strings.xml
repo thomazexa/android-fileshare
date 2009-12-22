@@ -30,4 +30,5 @@
 <string name="shareurl_title">Share</string>
 <string name="preferences_button">Preferences</string>
 
+<string name="whats_new">* Share URLs by long pressing on files or folders.\n* New preferences to allow uploads.</string>
 </resources>
