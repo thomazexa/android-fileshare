@@ -246,6 +246,7 @@ public class FileSharingProvider extends ContentProvider {
 	 * @return
 	 */
 	public static final Uri addFileToFolder(ContentResolver cr, Uri file, Uri folder) {
+	  Log.i(TAG, "Adding file to folder " + file + " " + folder);
 		/* Get file path */
 		Cursor c = cr.query(file, null, null, null, null);
 		int nameIndex = c.getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME);

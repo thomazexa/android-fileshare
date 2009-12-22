@@ -30,60 +30,61 @@ import android.os.IBinder;
 import android.util.Log;
 
 public class FileSharingService extends Service {
-	
-	private static final String PREFS_NAME = "FileSharerServicePrefs";
 
-	private static final int DEFAULT_PORT = 9999;
+  private static final String PREFS_NAME = "FileSharerServicePrefs";
 
-	private static final String TAG = "FileSharerService";
+  private static final int DEFAULT_PORT = 9999;
 
-	private WebServer mWebServer;
+  private static final String TAG = "FileSharerService";
 
-	private int mPort;
+  private WebServer mWebServer;
 
-	private final IFileSharingService.Stub mBinder = new IFileSharingService.Stub() {
-		public int getPort() {
-			return mPort;
-		}
-	};
+  private int mPort;
 
-	@Override
-	public void onCreate() {
-		super.onCreate();
+  private final IFileSharingService.Stub mBinder = new IFileSharingService.Stub() {
+    public int getPort() {
+      return mPort;
+    }
+  };
 
-		SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-		mPort = settings.getInt("port", DEFAULT_PORT);
-		try {
-			mWebServer = new WebServer(getContentResolver(), mPort);
-			mWebServer.setOnTransferStartedListener(new WebServer.TransferStartedListener() {
-				public void started(Uri uri) {
-					NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-					Notification notification = new Notification(R.drawable.folder, null, System.currentTimeMillis());
-					PendingIntent pendingIntent = PendingIntent.getActivity(FileSharingService.this, 0, new Intent(
-							FileSharingService.this, FileShare.class), 0);
-					notification.setLatestEventInfo(FileSharingService.this, "File Share", "Transfer Started", pendingIntent);
-					nm.notify(1, notification);
-				}
-			});
-		} catch (IOException e) {
-			Log.e(TAG, "Problem creating server socket " + e.toString());
-		}
+  @Override
+  public void onCreate() {
+    super.onCreate();
 
-		Thread t = new Thread() {
-			public void run() {
-				mWebServer.runWebServer();
-			}
-		};
-		t.start();
-		Log.i(TAG, "Started webserver");
-	}
+    SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+    mPort = settings.getInt("port", DEFAULT_PORT);
+    try {
+      mWebServer = new WebServer(getContentResolver(), mPort);
+      mWebServer.setOnTransferStartedListener(new WebServer.TransferStartedListener() {
+        public void started(Uri uri) {
+          NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+          Notification notification = new Notification(R.drawable.folder, null, System.currentTimeMillis());
+          PendingIntent pendingIntent = PendingIntent.getActivity(FileSharingService.this, 0, new Intent(
+              FileSharingService.this, FileShare.class), 0);
+          notification.setLatestEventInfo(FileSharingService.this, "File Share", "Transfer Started", pendingIntent);
+          nm.notify(1, notification);
+        }
+      });
+    } catch (IOException e) {
+      Log.e(TAG, "Problem creating server socket " + e.toString());
+    }
 
-	@Override
-	public IBinder onBind(Intent intent) {
-		if (IFileSharingService.class.getName().equals(intent.getAction())) {
-			return mBinder;
-		}
-		return null;
-	}
+    Thread t = new Thread() {
+      @Override
+      public void run() {
+        mWebServer.runWebServer();
+      }
+    };
+    t.start();
+    Log.i(TAG, "Started webserver");
+  }
+
+  @Override
+  public IBinder onBind(Intent intent) {
+    if (IFileSharingService.class.getName().equals(intent.getAction())) {
+      return mBinder;
+    }
+    return null;
+  }
 
 }
