@@ -28,4 +28,6 @@
     
 <string name="share_url">Share URL</string>
 <string name="shareurl_title">Share</string>
+<string name="preferences_button">Preferences</string>
+
 </resources>

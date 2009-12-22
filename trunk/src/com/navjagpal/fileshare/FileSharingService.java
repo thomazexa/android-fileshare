@@ -31,7 +31,9 @@ import android.util.Log;
 
 public class FileSharingService extends Service {
 
-  private static final String PREFS_NAME = "FileSharerServicePrefs";
+  static final String PREFS_NAME = "FileSharerServicePrefs";
+  static final String PREFS_ALLOW_UPLOADS = "ALLOW_UPLOADS";
+
 
   private static final int DEFAULT_PORT = 9999;
 
@@ -51,10 +53,11 @@ public class FileSharingService extends Service {
   public void onCreate() {
     super.onCreate();
 
-    SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+    SharedPreferences settings = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
     mPort = settings.getInt("port", DEFAULT_PORT);
     try {
-      mWebServer = new WebServer(getContentResolver(), mPort);
+      mWebServer = new WebServer(
+          getContentResolver(), settings, mPort);
       mWebServer.setOnTransferStartedListener(new WebServer.TransferStartedListener() {
         public void started(Uri uri) {
           NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);

@@ -24,7 +24,6 @@ public class Help extends Activity {
     super.onCreate(icicle);
 
     setContentView(R.layout.help);
-
   }
 
 }

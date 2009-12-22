@@ -26,6 +26,14 @@ android:text="@string/manage_button"
 </Button>
 
 <Button
+android:id="@+id/preferences"
+android:layout_width="fill_parent"
+android:layout_height="wrap_content"
+android:text="@string/preferences_button"
+>
+</Button>
+
+<Button
 android:id="@+id/help"
 android:layout_width="fill_parent"
 android:layout_height="wrap_content"
