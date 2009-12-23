@@ -234,10 +234,10 @@ public class WebServer {
 
     /* Get the filename. */
     StringTokenizer tokens = new StringTokenizer(
-        headers, "; ", false);
+        headers, ";", false);
     String filename = null;
     while (tokens.hasMoreTokens() && filename == null) {
-      String token = tokens.nextToken();
+      String token = tokens.nextToken().trim();
       if (token.startsWith("filename=")) {
         filename = URLDecoder.decode(token.substring(
             "filename=\"".length(), token.lastIndexOf("\"")), "utf8");
