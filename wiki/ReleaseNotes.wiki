@@ -1,0 +1,11 @@
+#summary Release Notes
+
+= 1.0a Beta =
+Date: 2009-12-24
+   * Sharing URLs for shared folders and files by long press.
+   * Uploading files from desktop to phone from web interface.
+   * Simple preferences.
+
+= 1.0 Beta =
+Date: 2009-12-13
+   * Initial release.
