@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">File Share</string>
+    <string name="manage_button">Managed Shared Content</string>
+    <string name="addfile_button">Add File to Shared Folder</string>
+    <string name="choosefile_title">Find File to Share"</string>
+    <string name="empty_directory">Empty</string>
+    <string name="port">Port:9999</string>
+    <string name="delete">Delete</string>
+    <string name="foldername_prefix">Folder:</string>
+    <string name="foldersize_prefix">Number of Files:</string>
+    <string name="delete_ok_button">Delete</string>
+    <string name="delete_cancel_button">Cancel</string>
+    <string name="create">New</string>
+    <string name="create_ok_button">Create</string>
+    <string name="create_cancel_button">Cancel</string>
+    <string name="edit">Edit</string>
+    <string name="ipaddress_prefix">IP Address:</string>
+    <string name="port_prefix">Port:</string>
+    <string name="url_prefix">URL:</string>
+    <string name="unknown_ipaddress">Unknown</string>
+    <string name="help_button">Help</string>
+    <string name="help_content"><b>How do I share files?</b>\nSelect "Share a File" from the menu.
+    Select a file to share, then select the shared folder.\n\n<b>How do my friends access my shared files?</b>\nTell them to go to http://youripaddress:9999
+    \n\n<b>What is my IP Address?</b>\nYou'll have to find that out by investigating your wireless settings.\n\n
+    <b>How do I turn off/on the service?</b>\nThe sharing service is automatically started when the File Share application is
+    first started. The ability to turn on/off the service will be available in a future release.</string>
+    
+<string name="share_url">Share URL</string>
+<string name="shareurl_title">Share</string>
+<string name="preferences_button">Preferences</string>
+
+<string name="whats_new">* Share URLs by long pressing on files or folders.\n* New preferences to allow uploads.</string>
+</resources>
