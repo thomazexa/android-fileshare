@@ -22,6 +22,7 @@ import java.net.UnknownHostException;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -35,12 +36,13 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 public class FileShare extends Activity {
 
   private static final String TAG = "FileSharer";
-  
+
   /* startActivity request codes */
   private static final int PICK_FILE_REQUEST = 1;
   private static final int PICK_FOLDER_REQUEST = 2;
@@ -48,14 +50,16 @@ public class FileShare extends Activity {
   /* Used to keep track of the currently selected file */
   private Uri mFileToShare;
 
+  private static final int DIALOG_PASSWORD = 0;
+
   private final View.OnClickListener mAddFileListener = new View.OnClickListener() {
     public void onClick(View v) {
       Intent pickFileIntent = new Intent();
       pickFileIntent.setAction(Intent.ACTION_GET_CONTENT);
       pickFileIntent.addCategory(Intent.CATEGORY_OPENABLE);
       pickFileIntent.setType("*/*");
-      Intent chooserIntent = Intent.createChooser(
-          pickFileIntent, getText(R.string.choosefile_title));
+      Intent chooserIntent = Intent.createChooser(pickFileIntent,
+          getText(R.string.choosefile_title));
       startActivityForResult(chooserIntent, PICK_FILE_REQUEST);
     }
   };
@@ -90,7 +94,7 @@ public class FileShare extends Activity {
 
     /* Setup the status text */
     TextView ipTextView = (TextView) findViewById(R.id.url);
-    //ipTextView.setText(getText(R.string.unknown_ipaddress));
+    // ipTextView.setText(getText(R.string.unknown_ipaddress));
     ipTextView.setText("http://" + getIPAddress(this) + ":9999");
 
     /* Preferences button */
@@ -100,19 +104,32 @@ public class FileShare extends Activity {
     preferencesButton.setOnClickListener(new View.OnClickListener() {
       public void onClick(View v) {
         AlertDialog.Builder builder = new AlertDialog.Builder(FileShare.this);
-       
+
         builder.setTitle("Preferences");
-        builder.setMultiChoiceItems(
-            new CharSequence[] {"Allow Uploads"},
-            new boolean[] {sharedPreferences.getBoolean(
-                FileSharingService.PREFS_ALLOW_UPLOADS, false)},
-                new DialogInterface.OnMultiChoiceClickListener() {
-              public void onClick(DialogInterface arg0, int arg1, boolean arg2) {
-                if (arg1 == 0) {
+        builder.setMultiChoiceItems(new CharSequence[] { "Allow Uploads",
+            "Require Password" }, new boolean[] {
+            sharedPreferences.getBoolean(
+                FileSharingService.PREFS_ALLOW_UPLOADS, false),
+            sharedPreferences.getBoolean(
+                FileSharingService.PREFS_REQUIRE_LOGIN, false) },
+            new DialogInterface.OnMultiChoiceClickListener() {
+              public void onClick(DialogInterface dialog, 
+                  int item, boolean value) {
+                if (item == 0) {
                   SharedPreferences.Editor editor = sharedPreferences.edit();
-                  editor.putBoolean(
-                      FileSharingService.PREFS_ALLOW_UPLOADS, arg2);
+                  editor.putBoolean(FileSharingService.PREFS_ALLOW_UPLOADS,
+                      value);
                   editor.commit();
+                } else if (item == 1) {
+                  SharedPreferences.Editor editor = sharedPreferences.edit();
+                  editor.putBoolean(FileSharingService.PREFS_REQUIRE_LOGIN,
+                      value);
+                  editor.commit();
+                  /* If user has enabled the password feature, 
+                   * show the password dialog. */
+                  if (value == true) {
+                    showDialog(DIALOG_PASSWORD);
+                  }
                 }
               }
             });
@@ -130,7 +147,7 @@ public class FileShare extends Activity {
         startActivity(helpIntent);
       }
     });
-    
+
     /* Display a "What's New" dialog if necessary. */
     PackageManager pm = getPackageManager();
     try {
@@ -149,36 +166,36 @@ public class FileShare extends Activity {
     }
   }
 
-
   @Override
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     if (resultCode != RESULT_OK)
       return;
 
     switch (requestCode) {
-      case PICK_FILE_REQUEST:
-        /* Store this file somewhere */
-        mFileToShare = data.getData();
+    case PICK_FILE_REQUEST:
+      /* Store this file somewhere */
+      mFileToShare = data.getData();
 
-        /* Now pick a folder */
-        Intent pickFolder = new Intent();
-        pickFolder.setAction(Intent.ACTION_PICK);
-        pickFolder.setType(FileSharingProvider.Folders.CONTENT_ITEM_TYPE);
-        startActivityForResult(pickFolder, PICK_FOLDER_REQUEST);
-        break;
-      case PICK_FOLDER_REQUEST:
-        addFileToFolder(mFileToShare, data.getData());
-        break;
+      /* Now pick a folder */
+      Intent pickFolder = new Intent();
+      pickFolder.setAction(Intent.ACTION_PICK);
+      pickFolder.setType(FileSharingProvider.Folders.CONTENT_ITEM_TYPE);
+      startActivityForResult(pickFolder, PICK_FOLDER_REQUEST);
+      break;
+    case PICK_FOLDER_REQUEST:
+      addFileToFolder(mFileToShare, data.getData());
+      break;
 
     }
   }
 
   private void addFileToFolder(Uri file, Uri folder) {
-    FileSharingProvider.addFileToFolder(getContentResolver(), file, folder);	
+    FileSharingProvider.addFileToFolder(getContentResolver(), file, folder);
   }
 
   public static String getIPAddress(Context context) {
-    WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+    WifiManager wifiManager = (WifiManager) context
+        .getSystemService(Context.WIFI_SERVICE);
     android.net.wifi.WifiInfo info = wifiManager.getConnectionInfo();
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     DataOutputStream dos = new DataOutputStream(bos);
@@ -207,6 +224,44 @@ public class FileShare extends Activity {
       return "unknown";
     }
     return address.getHostAddress();
+  }
+
+  protected Dialog onCreateDialog(int id) {
+    Dialog dialog;
+    switch (id) {
+    case DIALOG_PASSWORD:
+      dialog = new Dialog(FileShare.this);
+      dialog.setContentView(R.layout.password_dialog);
+      dialog.setTitle("Set Password");
+      final EditText passwordText = (EditText) dialog
+          .findViewById(R.id.password);
+      passwordText.setText(getSharedPreferences(FileSharingService.PREFS_NAME,
+          MODE_PRIVATE).getString(FileSharingService.PREFS_PASSWORD, ""));
+      Button okButton = (Button) dialog.findViewById(R.id.ok_button);
+      final Dialog passwordDialog = dialog;
+      okButton.setOnClickListener(new View.OnClickListener() {
+        public void onClick(View view) {
+          SharedPreferences preferences = getSharedPreferences(
+              FileSharingService.PREFS_NAME, MODE_PRIVATE);
+          String newPassword = passwordText.getText().toString();
+          if (!newPassword.equals(preferences.getString(
+              FileSharingService.PREFS_PASSWORD, ""))) {
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putString(FileSharingService.PREFS_PASSWORD, passwordText
+                .getText().toString());
+            editor.commit();
+            /* The password has changed, delete all cookies. */
+            new CookiesDatabaseOpenHelper(FileShare.this).getWritableDatabase()
+                .delete("cookies", null, null);
+          }
+          passwordDialog.dismiss();
+        }
+      });
+      break;
+    default:
+      dialog = null;
+    }
+    return dialog;
   }
 
 }

@@ -33,7 +33,8 @@ public class FileSharingService extends Service {
 
   static final String PREFS_NAME = "FileSharerServicePrefs";
   static final String PREFS_ALLOW_UPLOADS = "ALLOW_UPLOADS";
-
+  public static String PREFS_REQUIRE_LOGIN = "REQUIRE_LOGIN";
+  public static String PREFS_PASSWORD = "PASSWORD";
 
   private static final int DEFAULT_PORT = 9999;
 
@@ -56,15 +57,19 @@ public class FileSharingService extends Service {
     SharedPreferences settings = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
     mPort = settings.getInt("port", DEFAULT_PORT);
     try {
-      mWebServer = new WebServer(
-          getContentResolver(), settings, mPort);
-      mWebServer.setOnTransferStartedListener(new WebServer.TransferStartedListener() {
+      mWebServer = new WebServer(getContentResolver(), settings,
+          new CookiesDatabaseOpenHelper(this).getWritableDatabase(), mPort);
+      mWebServer
+      .setOnTransferStartedListener(new WebServer.TransferStartedListener() {
         public void started(Uri uri) {
           NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-          Notification notification = new Notification(R.drawable.folder, null, System.currentTimeMillis());
-          PendingIntent pendingIntent = PendingIntent.getActivity(FileSharingService.this, 0, new Intent(
-              FileSharingService.this, FileShare.class), 0);
-          notification.setLatestEventInfo(FileSharingService.this, "File Share", "Transfer Started", pendingIntent);
+          Notification notification = new Notification(R.drawable.folder,
+              null, System.currentTimeMillis());
+          PendingIntent pendingIntent = PendingIntent.getActivity(
+              FileSharingService.this, 0, new Intent(
+                  FileSharingService.this, FileShare.class), 0);
+          notification.setLatestEventInfo(FileSharingService.this,
+              "File Share", "Transfer Started", pendingIntent);
           nm.notify(1, notification);
         }
       });
