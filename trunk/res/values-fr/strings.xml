@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="manage_button">Gérer le Contenu Partagé</string>
+    <string name="addfile_button">Ajouter un fichier à un dossier partagé</string>
+    <string name="choosefile_title">Trouver un fichier à partager</string>
+    <string name="empty_directory">Vide</string>
+    <string name="delete">Supprimer</string>
+    <string name="foldername_prefix">Dossier:</string>
+    <string name="foldersize_prefix">Nombre de dossiers:</string>
+    <string name="delete_ok_button">Supprimer</string>
+    <string name="delete_cancel_button">Annuler</string>
+    <string name="create">Nouveau</string>
+    <string name="create_ok_button">Créer</string>
+    <string name="create_cancel_button">Annuler</string>
+    <string name="edit">Modifier</string>
+    <string name="ipaddress_prefix">Adresse IP:</string>
+    <string name="port_prefix">Port:</string>
+    <string name="unknown_ipaddress">Inconnue</string>
+    <string name="help_button">Aide</string>
+    
+<string name="share_url">Partager URL</string>
+<string name="shareurl_title">Partager</string>
+<string name="preferences_button">Préférences</string>
+
+</resources>
