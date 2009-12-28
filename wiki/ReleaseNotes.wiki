@@ -4,6 +4,7 @@
 Date: Not Yet Released
    * Add optional password protection.
    * Automatically create and serve MP3 playlists (.m3u file).
+   * French translations.
 
 = 1.0a Beta =
 Date: 2009-12-24
