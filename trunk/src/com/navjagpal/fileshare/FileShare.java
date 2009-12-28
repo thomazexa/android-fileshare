@@ -94,7 +94,6 @@ public class FileShare extends Activity {
 
     /* Setup the status text */
     TextView ipTextView = (TextView) findViewById(R.id.url);
-    // ipTextView.setText(getText(R.string.unknown_ipaddress));
     ipTextView.setText("http://" + getIPAddress(this) + ":9999");
 
     /* Preferences button */
@@ -107,32 +106,32 @@ public class FileShare extends Activity {
 
         builder.setTitle("Preferences");
         builder.setMultiChoiceItems(new CharSequence[] { "Allow Uploads",
-            "Require Password" }, new boolean[] {
+        "Require Password" }, new boolean[] {
             sharedPreferences.getBoolean(
                 FileSharingService.PREFS_ALLOW_UPLOADS, false),
-            sharedPreferences.getBoolean(
-                FileSharingService.PREFS_REQUIRE_LOGIN, false) },
-            new DialogInterface.OnMultiChoiceClickListener() {
-              public void onClick(DialogInterface dialog, 
-                  int item, boolean value) {
-                if (item == 0) {
-                  SharedPreferences.Editor editor = sharedPreferences.edit();
-                  editor.putBoolean(FileSharingService.PREFS_ALLOW_UPLOADS,
-                      value);
-                  editor.commit();
-                } else if (item == 1) {
-                  SharedPreferences.Editor editor = sharedPreferences.edit();
-                  editor.putBoolean(FileSharingService.PREFS_REQUIRE_LOGIN,
-                      value);
-                  editor.commit();
-                  /* If user has enabled the password feature, 
-                   * show the password dialog. */
-                  if (value == true) {
-                    showDialog(DIALOG_PASSWORD);
-                  }
-                }
+                sharedPreferences.getBoolean(
+                    FileSharingService.PREFS_REQUIRE_LOGIN, false) },
+                    new DialogInterface.OnMultiChoiceClickListener() {
+          public void onClick(DialogInterface dialog, 
+              int item, boolean value) {
+            if (item == 0) {
+              SharedPreferences.Editor editor = sharedPreferences.edit();
+              editor.putBoolean(FileSharingService.PREFS_ALLOW_UPLOADS,
+                  value);
+              editor.commit();
+            } else if (item == 1) {
+              SharedPreferences.Editor editor = sharedPreferences.edit();
+              editor.putBoolean(FileSharingService.PREFS_REQUIRE_LOGIN,
+                  value);
+              editor.commit();
+              /* If user has enabled the password feature, 
+               * show the password dialog. */
+              if (value == true) {
+                showDialog(DIALOG_PASSWORD);
               }
-            });
+            }
+          }
+        });
         builder.setPositiveButton("Done", null);
         builder.show();
       }
@@ -155,7 +154,7 @@ public class FileShare extends Activity {
       if (!sharedPreferences.getBoolean(pi.versionName, false)) {
         sharedPreferences.edit().putBoolean(pi.versionName, true).commit();
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("What's New");
+        builder.setTitle(R.string.whats_new_title);
         builder.setMessage(R.string.whats_new);
         builder.setPositiveButton("OK", null);
         builder.show();
@@ -172,19 +171,19 @@ public class FileShare extends Activity {
       return;
 
     switch (requestCode) {
-    case PICK_FILE_REQUEST:
-      /* Store this file somewhere */
-      mFileToShare = data.getData();
+      case PICK_FILE_REQUEST:
+        /* Store this file somewhere */
+        mFileToShare = data.getData();
 
-      /* Now pick a folder */
-      Intent pickFolder = new Intent();
-      pickFolder.setAction(Intent.ACTION_PICK);
-      pickFolder.setType(FileSharingProvider.Folders.CONTENT_ITEM_TYPE);
-      startActivityForResult(pickFolder, PICK_FOLDER_REQUEST);
-      break;
-    case PICK_FOLDER_REQUEST:
-      addFileToFolder(mFileToShare, data.getData());
-      break;
+        /* Now pick a folder */
+        Intent pickFolder = new Intent();
+        pickFolder.setAction(Intent.ACTION_PICK);
+        pickFolder.setType(FileSharingProvider.Folders.CONTENT_ITEM_TYPE);
+        startActivityForResult(pickFolder, PICK_FOLDER_REQUEST);
+        break;
+      case PICK_FOLDER_REQUEST:
+        addFileToFolder(mFileToShare, data.getData());
+        break;
 
     }
   }
@@ -195,7 +194,7 @@ public class FileShare extends Activity {
 
   public static String getIPAddress(Context context) {
     WifiManager wifiManager = (WifiManager) context
-        .getSystemService(Context.WIFI_SERVICE);
+    .getSystemService(Context.WIFI_SERVICE);
     android.net.wifi.WifiInfo info = wifiManager.getConnectionInfo();
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     DataOutputStream dos = new DataOutputStream(bos);
@@ -226,40 +225,41 @@ public class FileShare extends Activity {
     return address.getHostAddress();
   }
 
+  @Override
   protected Dialog onCreateDialog(int id) {
     Dialog dialog;
     switch (id) {
-    case DIALOG_PASSWORD:
-      dialog = new Dialog(FileShare.this);
-      dialog.setContentView(R.layout.password_dialog);
-      dialog.setTitle("Set Password");
-      final EditText passwordText = (EditText) dialog
-          .findViewById(R.id.password);
-      passwordText.setText(getSharedPreferences(FileSharingService.PREFS_NAME,
-          MODE_PRIVATE).getString(FileSharingService.PREFS_PASSWORD, ""));
-      Button okButton = (Button) dialog.findViewById(R.id.ok_button);
-      final Dialog passwordDialog = dialog;
-      okButton.setOnClickListener(new View.OnClickListener() {
-        public void onClick(View view) {
-          SharedPreferences preferences = getSharedPreferences(
-              FileSharingService.PREFS_NAME, MODE_PRIVATE);
-          String newPassword = passwordText.getText().toString();
-          if (!newPassword.equals(preferences.getString(
-              FileSharingService.PREFS_PASSWORD, ""))) {
-            SharedPreferences.Editor editor = preferences.edit();
-            editor.putString(FileSharingService.PREFS_PASSWORD, passwordText
-                .getText().toString());
-            editor.commit();
-            /* The password has changed, delete all cookies. */
-            new CookiesDatabaseOpenHelper(FileShare.this).getWritableDatabase()
-                .delete("cookies", null, null);
+      case DIALOG_PASSWORD:
+        dialog = new Dialog(FileShare.this);
+        dialog.setContentView(R.layout.password_dialog);
+        dialog.setTitle(R.string.set_password_title);
+        final EditText passwordText = (EditText) dialog
+        .findViewById(R.id.password);
+        passwordText.setText(getSharedPreferences(FileSharingService.PREFS_NAME,
+            MODE_PRIVATE).getString(FileSharingService.PREFS_PASSWORD, ""));
+        Button okButton = (Button) dialog.findViewById(R.id.ok_button);
+        final Dialog passwordDialog = dialog;
+        okButton.setOnClickListener(new View.OnClickListener() {
+          public void onClick(View view) {
+            SharedPreferences preferences = getSharedPreferences(
+                FileSharingService.PREFS_NAME, MODE_PRIVATE);
+            String newPassword = passwordText.getText().toString();
+            if (!newPassword.equals(preferences.getString(
+                FileSharingService.PREFS_PASSWORD, ""))) {
+              SharedPreferences.Editor editor = preferences.edit();
+              editor.putString(FileSharingService.PREFS_PASSWORD, passwordText
+                  .getText().toString());
+              editor.commit();
+              /* The password has changed, delete all cookies. */
+              new CookiesDatabaseOpenHelper(FileShare.this).getWritableDatabase()
+              .delete("cookies", null, null);
+            }
+            passwordDialog.dismiss();
           }
-          passwordDialog.dismiss();
-        }
-      });
-      break;
-    default:
-      dialog = null;
+        });
+        break;
+      default:
+        dialog = null;
     }
     return dialog;
   }
