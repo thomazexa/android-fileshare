@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">File Share</string>
-    <string name="manage_button">Managed Shared Content</string>
+    <string name="manage_button">Manage Shared Content</string>
     <string name="addfile_button">Add File to Shared Folder</string>
     <string name="choosefile_title">Find File to Share"</string>
     <string name="empty_directory">Empty</string>
