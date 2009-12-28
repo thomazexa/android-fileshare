@@ -15,7 +15,9 @@
 package com.navjagpal.fileshare;
 
 import android.app.ListActivity;
+import android.content.ContentResolver;
 import android.content.ContentUris;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -143,7 +145,7 @@ public class SharedFileBrowser extends ListActivity {
         Intent shareURLIntent = new Intent();
         shareURLIntent.setAction(Intent.ACTION_SEND);
         shareURLIntent.setType("text/plain");
-        shareURLIntent.putExtra(Intent.EXTRA_TEXT, getShareURL(info.id));
+        shareURLIntent.putExtra(Intent.EXTRA_TEXT, getShareURL(info.id, this));
         Intent chooserIntent = Intent.createChooser(
             shareURLIntent, getText(R.string.shareurl_title));
         startActivity(chooserIntent);
@@ -153,9 +155,10 @@ public class SharedFileBrowser extends ListActivity {
     return false;
   }
 
-  public String getShareURL(long fileId) {
+  public static String getShareURL(long fileId,
+      Context context) {
     String where = FileSharingProvider.Files.Columns._ID + "=" + fileId;
-    Cursor c = getContentResolver().query(
+    Cursor c = context.getContentResolver().query(
         FileSharingProvider.Files.CONTENT_URI,
         new String[] {FileSharingProvider.Files.Columns.DISPLAY_NAME},
         where, null, null);
@@ -170,7 +173,7 @@ public class SharedFileBrowser extends ListActivity {
       Log.e(TAG, "Problem encoding display name " + c.getString(0));
     }
 
-    return "http://" + FileShare.getIPAddress(this) + ":9999" +
+    return "http://" + FileShare.getIPAddress(context) + ":9999" +
     "/file/" + fileId + "/" + encodedName;
   }
 

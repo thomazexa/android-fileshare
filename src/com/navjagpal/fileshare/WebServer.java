@@ -44,6 +44,7 @@ import java.net.URLDecoder;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -58,8 +59,8 @@ public class WebServer {
   private int mPort;
 
   private ServerSocket mServerSocket;
-
-  private ContentResolver mContentResolver;
+  
+  private Context mContext;
 
   private SharedPreferences mSharedPreferences;
 
@@ -75,13 +76,13 @@ public class WebServer {
   private static final int COOKIE_EXPIRY_SECONDS = 3600;
 
   /* Start the webserver on specified port */
-  public WebServer(ContentResolver contentResolver,
+  public WebServer(Context context,
       SharedPreferences sharedPreferences, SQLiteDatabase cookiesDatabase,
       int port) throws IOException {
     mPort = port;
     mServerSocket = new ServerSocket(mPort);
     mServerSocket.setReuseAddress(true);
-    mContentResolver = contentResolver;
+    mContext = context;
     mSharedPreferences = sharedPreferences;
     mCookiesDatabase = cookiesDatabase;
     deleteOldCookies();
@@ -159,6 +160,9 @@ public class WebServer {
       } else if (requestLine.getMethod().equals("POST")) {
         Log.i(TAG, "User is uploading file");
         handleUploadRequest(serverConnection, request, requestLine);
+      } else if (requestLine.getUri().startsWith("/playlist")) {
+        Log.i(TAG, "User is requesting playlist");
+        sendPlaylist(serverConnection, requestLine);
       } else {
         Log.i(TAG, "No action for " + requestLine.getUri());
         sendNotFound(serverConnection);
@@ -271,6 +275,35 @@ public class WebServer {
     serverConnection.sendResponseHeader(response);
     serverConnection.sendResponseEntity(response);
   }
+  
+  private void sendPlaylist(DefaultHttpServerConnection serverConnection,
+      RequestLine requestLine) throws IOException, HttpException {
+    HttpResponse response = new BasicHttpResponse(new HttpVersion(1, 1), 200,
+    "OK");
+    String folderId = getFolderId(requestLine.getUri());
+    
+    Cursor c = mContext.getContentResolver().query(
+        FileSharingProvider.Files.CONTENT_URI,
+        new String[] {FileSharingProvider.Files.Columns._ID,
+            FileSharingProvider.Files.Columns.DISPLAY_NAME},
+            null, null, null);
+    String playlist = "";
+    while (c.moveToNext()) {
+      long id = c.getLong(c.getColumnIndex(
+          FileSharingProvider.Files.Columns._ID));
+      String name = c.getString(c.getColumnIndex(
+          FileSharingProvider.Files.Columns.DISPLAY_NAME));
+      if (name.endsWith(".mp3")) {
+        playlist += SharedFileBrowser.getShareURL(id, mContext) + "\n";
+      }
+    }
+    c.close();
+    response.addHeader("Content-Type", "audio/x-mpegurl");
+    response.addHeader("Content-Length", "" + playlist.length());
+    response.setEntity(new StringEntity(playlist));
+    serverConnection.sendResponseHeader(response);
+    serverConnection.sendResponseEntity(response);
+  }
 
   private void sendSharedFilesList(
       DefaultHttpServerConnection serverConnection, RequestLine requestLine)
@@ -354,7 +387,8 @@ public class WebServer {
         .getAbsolutePath());
     Uri folderUri = Uri.withAppendedPath(
         FileSharingProvider.Folders.CONTENT_URI, folderId);
-    FileSharingProvider.addFileToFolder(mContentResolver, fileUri, folderUri);
+    FileSharingProvider.addFileToFolder(mContext.getContentResolver(),
+        fileUri, folderUri);
   }
 
   public String getHTMLHeader() {
@@ -367,7 +401,8 @@ public class WebServer {
 
   private String getFolderListing() {
     /* Get list of folders */
-    Cursor c = mContentResolver.query(FileSharingProvider.Folders.CONTENT_URI,
+    Cursor c = mContext.getContentResolver().query(
+        FileSharingProvider.Folders.CONTENT_URI,
         null, null, null, null);
     int nameIndex = c
         .getColumnIndexOrThrow(FileSharingProvider.Folders.Columns.DISPLAY_NAME);
@@ -398,7 +433,7 @@ public class WebServer {
   }
 
   private String getFolderId(String firstline) {
-    Pattern p = Pattern.compile("/folder/(\\d+)");
+    Pattern p = Pattern.compile("/(?:folder|playlist)/(\\d+)");
     Matcher m = p.matcher(firstline);
     boolean b = m.find(0);
     if (b) {
@@ -428,19 +463,32 @@ public class WebServer {
     int folderId = Integer.parseInt(uri.getPathSegments().get(1));
     Uri fileUri = FileSharingProvider.Files.CONTENT_URI;
     String where = FileSharingProvider.Files.Columns.FOLDER_ID + "=" + folderId;
-    Cursor c = mContentResolver.query(fileUri, null, where, null, null);
+    Cursor c = mContext.getContentResolver().query(
+        fileUri, null, where, null, null);
     int nameIndex = c
         .getColumnIndexOrThrow(FileSharingProvider.Files.Columns.DISPLAY_NAME);
     int idIndex = c
         .getColumnIndexOrThrow(FileSharingProvider.Files.Columns._ID);
     String s = "";
+    boolean hasMusic = false;
     while (c.moveToNext()) {
       String name = c.getString(nameIndex);
       int id = c.getInt(idIndex);
       s += fileToLink(name, id) + "<br/>";
+      if (name.endsWith(".mp3")) {
+        hasMusic = true;
+      }
     }
     c.close();
+    if (hasMusic) {
+      s += getPlaylistLink(folderId) + "<br/>";
+    }
     return s;
+  }
+  
+  private String getPlaylistLink(long folderId) {
+    return "<a href=\"/playlist/" + folderId + "/playlist.m3u\">" +
+           "MP3 Playlist</a>";
   }
 
   private void addFileEntity(final Uri uri, HttpResponse response)
@@ -449,7 +497,7 @@ public class WebServer {
       mTransferStartedListener.started(uri);
     }
 
-    Cursor c = mContentResolver.query(uri, null, null, null, null);
+    Cursor c = mContext.getContentResolver().query(uri, null, null, null, null);
     c.moveToFirst();
     int nameIndex = c
         .getColumnIndexOrThrow(FileSharingProvider.Files.Columns.DISPLAY_NAME);
@@ -458,13 +506,13 @@ public class WebServer {
         .getColumnIndexOrThrow(FileSharingProvider.Files.Columns._DATA);
     Uri data = Uri.parse(c.getString(dataIndex));
 
-    c = mContentResolver.query(data, null, null, null, null);
+    c = mContext.getContentResolver().query(data, null, null, null, null);
     c.moveToFirst();
     int sizeIndex = c.getColumnIndexOrThrow(OpenableColumns.SIZE);
     int sizeBytes = c.getInt(sizeIndex);
     c.close();
 
-    InputStream input = mContentResolver.openInputStream(data);
+    InputStream input = mContext.getContentResolver().openInputStream(data);
 
     String contentType = "application/octet-stream";
     if (name.endsWith(".jpg")) {

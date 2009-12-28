@@ -57,7 +57,7 @@ public class FileSharingService extends Service {
     SharedPreferences settings = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
     mPort = settings.getInt("port", DEFAULT_PORT);
     try {
-      mWebServer = new WebServer(getContentResolver(), settings,
+      mWebServer = new WebServer(this, settings,
           new CookiesDatabaseOpenHelper(this).getWritableDatabase(), mPort);
       mWebServer
       .setOnTransferStartedListener(new WebServer.TransferStartedListener() {
