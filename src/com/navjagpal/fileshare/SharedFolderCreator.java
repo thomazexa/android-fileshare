@@ -28,38 +28,39 @@ import android.widget.EditText;
  */
 public class SharedFolderCreator extends Activity {
 
-	@Override
-	public void onCreate(Bundle icicle) {
-		super.onCreate(icicle);
+  @Override
+  public void onCreate(Bundle icicle) {
+    super.onCreate(icicle);
 
-		setContentView(R.layout.createfolder);
+    setContentView(R.layout.createfolder);
 
-		/* Simple cancel button */
-		Button cancelButton = (Button) findViewById(R.id.cancel_button);
-		cancelButton.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				setResult(RESULT_CANCELED);
-				finish();
-			}
-		});
+    /* Simple cancel button */
+    Button cancelButton = (Button) findViewById(R.id.cancel_button);
+    cancelButton.setOnClickListener(new View.OnClickListener() {
+      public void onClick(View v) {
+        setResult(RESULT_CANCELED);
+        finish();
+      }
+    });
 
-		/* Grab name from the UI views and insert using the provder */
-		Button createButton = (Button) findViewById(R.id.ok_button);
-		createButton.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				/* Get params */
-				EditText editText = (EditText) findViewById(R.id.foldername);
-				String folderName = editText.getText().toString();
+    /* Grab name from the UI views and insert using the provder */
+    Button createButton = (Button) findViewById(R.id.ok_button);
+    createButton.setOnClickListener(new View.OnClickListener() {
+      public void onClick(View v) {
+        /* Get params */
+        EditText editText = (EditText) findViewById(R.id.foldername);
+        String folderName = editText.getText().toString();
 
-				/* Do the insert */
-				ContentValues values = new ContentValues();
-				values.put(FileSharingProvider.Folders.Columns.DISPLAY_NAME, folderName);
-				getContentResolver().insert(FileSharingProvider.Folders.CONTENT_URI, values);
-				setResult(RESULT_OK);
-				finish();
-			}
-		});
+        /* Do the insert */
+        ContentValues values = new ContentValues();
+        values.put(FileSharingProvider.Folders.Columns.DISPLAY_NAME, folderName);
+        getContentResolver().insert(
+            FileSharingProvider.Folders.CONTENT_URI, values);
+        setResult(RESULT_OK);
+        finish();
+      }
+    });
 
-	}
+  }
 
 }

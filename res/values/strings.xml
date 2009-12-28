@@ -31,4 +31,6 @@
 <string name="preferences_button">Preferences</string>
 
 <string name="whats_new">* Share URLs by long pressing on files or folders.\n* New preferences to allow uploads.</string>
+<string name="whats_new_title">What's New</string>
+<string name="set_password_title">Set Password</string>
 </resources>
