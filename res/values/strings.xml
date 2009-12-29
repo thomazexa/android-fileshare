@@ -20,6 +20,9 @@
     <string name="url_prefix">URL:</string>
     <string name="unknown_ipaddress">Unknown</string>
     <string name="help_button">Help</string>
+    <string name="share_all">Share All</string>
+    <string name="error_title">Error</string>
+    <string name="error_creating_folder">Problem Creating Shared Folder</string>
     <string name="help_content"><b>How do I share files?</b>\nSelect "Share a File" from the menu.
     Select a file to share, then select the shared folder.\n\n<b>How do my friends access my shared files?</b>\nTell them to go to http://youripaddress:9999
     \n\n<b>What is my IP Address?</b>\nYou'll have to find that out by investigating your wireless settings.\n\n
