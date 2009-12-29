@@ -30,9 +30,12 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.database.Cursor;
+import android.database.SQLException;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.provider.OpenableColumns;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -188,8 +191,37 @@ public class FileShare extends Activity {
     }
   }
 
+  /**
+   * Adds a file to a shared folder. If the provided file is actually a 
+   * folder, all files under that folder will be added to the shared folder.
+   * This includes files from sub-directories as well.
+   * 
+   * @param file Uri for file.
+   * @param folder Uri for shared folder.
+   */
   private void addFileToFolder(Uri file, Uri folder) {
-    FileSharingProvider.addFileToFolder(getContentResolver(), file, folder);
+    /* The URI could be a folder. If it is, assume we want all files under that
+     * folder.
+     */
+    if (getContentResolver().getType(file).equals(
+        FileProvider.CONTENT_TYPE)) {
+      Cursor c = managedQuery(
+          file, new String[] {OpenableColumns.DISPLAY_NAME},
+          null, null, null);
+      while (c.moveToNext()) {
+        String filename = c.getString(c.getColumnIndex(
+            OpenableColumns.DISPLAY_NAME));
+        Uri uri = Uri.withAppendedPath(
+            file, filename);
+        addFileToFolder(uri, folder);
+      }
+    } else {
+      try {
+        FileSharingProvider.addFileToFolder(getContentResolver(), file, folder);
+      } catch (SQLException exception) {
+        Log.w(TAG, "Error adding file " + file + " to folder " + folder);
+      }
+    }
   }
 
   public static String getIPAddress(Context context) {

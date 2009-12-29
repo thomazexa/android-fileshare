@@ -15,7 +15,10 @@
 package com.navjagpal.fileshare;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.ContentValues;
+import android.database.SQLException;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -28,6 +31,8 @@ import android.widget.EditText;
  */
 public class SharedFolderCreator extends Activity {
 
+  private static final int DIALOG_ERROR = 0;
+  
   @Override
   public void onCreate(Bundle icicle) {
     super.onCreate(icicle);
@@ -54,13 +59,31 @@ public class SharedFolderCreator extends Activity {
         /* Do the insert */
         ContentValues values = new ContentValues();
         values.put(FileSharingProvider.Folders.Columns.DISPLAY_NAME, folderName);
+        try {
         getContentResolver().insert(
             FileSharingProvider.Folders.CONTENT_URI, values);
+        } catch (SQLException e) {
+          showDialog(DIALOG_ERROR);
+          return;
+        }
         setResult(RESULT_OK);
         finish();
       }
     });
-
+  }
+  
+  @Override
+  protected Dialog onCreateDialog(int id) {
+    Dialog dialog = null;
+    switch (id) {
+      case DIALOG_ERROR:
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(R.string.error_creating_folder)
+          .setTitle(R.string.error_title);
+        dialog = builder.create();
+        break;
+    }
+    return dialog;
   }
 
 }

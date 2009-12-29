@@ -26,11 +26,15 @@ import android.database.MergeCursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.OpenableColumns;
+import android.util.Log;
+import android.view.ContextMenu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 
 
 /**
@@ -44,6 +48,7 @@ public class FileBrowser extends ListActivity {
   private Stack<String> mPaths = new Stack<String>();
 
   private static final int EMPTY_DIRECTORY_DIALOG = 0;
+  private static final int MENU_SHARE_ALL = 0;
 
   @Override
   public void onCreate(Bundle icicle) {
@@ -65,6 +70,8 @@ public class FileBrowser extends ListActivity {
     /* Populate list with the root content */
     Cursor c = managedQuery(getIntent().getData(), null, null, null, null);
     changeCursor(c);
+    
+    registerForContextMenu(getListView());
   }
 
   @Override
@@ -118,6 +125,40 @@ public class FileBrowser extends ListActivity {
         }
         changeCursor(c);
       }
+    }
+  }
+
+  @Override
+  public void onCreateContextMenu(ContextMenu menu, View v,
+      ContextMenu.ContextMenuInfo menuInfo) {
+    menu.add(0, MENU_SHARE_ALL, 0, R.string.share_all);
+  }
+  
+  @Override
+  public boolean onContextItemSelected(MenuItem item) {
+    AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+    switch (item.getItemId()) {
+      case MENU_SHARE_ALL:
+        Cursor c = (Cursor) getListView().getItemAtPosition(
+            info.position);
+        c.moveToPosition(info.position);
+        String path = mPaths.peek() + "/" + c.getString(
+            c.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+        Uri uri = Uri.withAppendedPath(getIntent().getData(), path);
+        setResult(RESULT_OK, new Intent().setData(uri));
+        finish();
+        break;
+    }
+    return false;
+  }
+
+  private void shareAllFilesUnder(Uri uri) {
+    Cursor c = managedQuery(
+        uri, new String[] {OpenableColumns.DISPLAY_NAME},
+        null, null, null);
+    while (c.moveToNext()) {
+      Log.i("FileShare", "Add uri " + c.getString(c.getColumnIndex(
+          OpenableColumns.DISPLAY_NAME)));
     }
   }
 
