@@ -6,6 +6,7 @@ Date: Not Yet Released
    * Automatically create and serve MP3 playlists (.m3u file).
    * Add the contents of an entire folder to a shared folder.
    * Updated database to have some unique constraints. Prevents duplicate shared folders and duplicate files appearing in the same folder.
+   * Download the contents of a shared folder as a ZIP file.
    * French translations.
    * Chinese translation for Taiwan.
 
