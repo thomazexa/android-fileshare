@@ -302,7 +302,7 @@ public class FileSharingProvider extends ContentProvider {
    * @param cr 
    * @param file
    * @param folder
-   * @return
+   * @return The Uri of the new shared item.
    */
   public static final Uri addFileToFolder(ContentResolver cr, Uri file, Uri folder) {
     Log.i(TAG, "Adding file to folder " + file + " " + folder);
@@ -327,7 +327,7 @@ public class FileSharingProvider extends ContentProvider {
    * 
    * @param cr
    * @param folder
-   * @return
+   * @return Whether or not the folder was deleted.
    */
   public static final boolean deleteFolder(ContentResolver cr, Uri folder) {
     int folderId = Integer.parseInt(folder.getPathSegments().get(1));

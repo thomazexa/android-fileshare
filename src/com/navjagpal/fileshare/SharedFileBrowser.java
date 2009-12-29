@@ -15,7 +15,6 @@
 package com.navjagpal.fileshare;
 
 import android.app.ListActivity;
-import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;

@@ -42,7 +42,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URLDecoder;
 
-import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -154,6 +153,9 @@ public class WebServer {
           && requestLine.getUri().startsWith("/folder")) {
         Log.i(TAG, "Sending list of shared files");
         sendSharedFilesList(serverConnection, requestLine);
+      } else if (requestLine.getUri().startsWith("/zip")) {
+        Log.i(TAG, "Sending zip file.");
+        sendFolderContent(serverConnection, requestLine);
       } else if (requestLine.getUri().startsWith("/file")) {
         Log.i(TAG, "Sending file content");
         sendFileContent(serverConnection, requestLine);
@@ -274,6 +276,30 @@ public class WebServer {
         fileId), response);
     serverConnection.sendResponseHeader(response);
     serverConnection.sendResponseEntity(response);
+  }
+  
+  /**
+   * Sends a ZIP file containing all files from the shared folder.
+   * 
+   * @param serverConnection
+   * @param requestLine
+   * @throws IOException
+   * @throws HttpException
+   */
+  private void sendFolderContent(DefaultHttpServerConnection serverConnection,
+      RequestLine requestLine) throws IOException, HttpException {
+    HttpResponse response = new BasicHttpResponse(new HttpVersion(1, 1), 200,
+        "OK");
+    String folderId = getFolderId(requestLine.getUri());
+    addFolderZipEntity(folderId, response);
+    serverConnection.sendResponseHeader(response);
+    serverConnection.sendResponseEntity(response);
+  }
+  
+  private void addFolderZipEntity(String folderId, HttpResponse response) {
+    response.addHeader("Content-Type", "application/zip");
+    response.setEntity(new StreamingZipEntity(
+        mContext.getContentResolver(), folderId));
   }
   
   private void sendPlaylist(DefaultHttpServerConnection serverConnection,
@@ -433,7 +459,7 @@ public class WebServer {
   }
 
   private String getFolderId(String firstline) {
-    Pattern p = Pattern.compile("/(?:folder|playlist)/(\\d+)");
+    Pattern p = Pattern.compile("/(?:folder|playlist|zip)/(\\d+)");
     Matcher m = p.matcher(firstline);
     boolean b = m.find(0);
     if (b) {
@@ -483,12 +509,18 @@ public class WebServer {
     if (hasMusic) {
       s += getPlaylistLink(folderId) + "<br/>";
     }
+    s += getZipLink(folderId) + "<br/>";
     return s;
   }
   
   private String getPlaylistLink(long folderId) {
     return "<a href=\"/playlist/" + folderId + "/playlist.m3u\">" +
            "MP3 Playlist</a>";
+  }
+  
+  private String getZipLink(long folderId) {
+    return "<a href=\"/zip/" + folderId + "/folder.zip\">" +
+           "Zip of Entire Folder</a>";
   }
 
   private void addFileEntity(final Uri uri, HttpResponse response)
