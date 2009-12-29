@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" ?> 
+ <resources>
+  <string name="app_name">檔案分享</string> 
+  <string name="manage_button">管理分享內容</string> 
+  <string name="addfile_button">加入檔案至分享資料夾</string> 
+  <string name="choosefile_title">尋找分享檔案"</string> 
+  <string name="empty_directory">空的</string> 
+  <string name="port">連接埠:9999</string> 
+  <string name="delete">刪除</string> 
+  <string name="foldername_prefix">資料夾:</string> 
+  <string name="foldersize_prefix">檔案數量:</string> 
+  <string name="delete_ok_button">刪除</string> 
+  <string name="delete_cancel_button">取消</string> 
+  <string name="create">新增</string> 
+  <string name="create_ok_button">創造</string> 
+  <string name="create_cancel_button">取消</string> 
+  <string name="edit">編輯</string> 
+  <string name="ipaddress_prefix">IP 位址:</string> 
+  <string name="port_prefix">連接埠:</string> 
+  <string name="url_prefix">URL:</string> 
+  <string name="unknown_ipaddress">未知</string> 
+  <string name="help_button">幫助</string> 
+ <string name="help_content">
+  <b>我如何分享檔案?</b> 
+  \nSelect "分享一個檔案" 從選單. 選擇一個檔案分享, 然後選擇分享資料夾.\n\n 
+  <b>我的朋友如何存取我分享的檔案?</b> 
+  \n告知他們到 http://youripaddress:9999 \n\n 
+  <b>我的 IP 位址是什麼?</b> 
+  \n你必須檢查你的無線網路設定.\n\n 
+  <b>我如何開啟/關閉此服務?</b> 
+  \n當程式首度執行時分享服務即自動開始. 未來版本將具開啟/關閉服務的功能. 
+  </string>
+  <string name="share_url">分享 URL</string> 
+  <string name="shareurl_title">分享</string> 
+  <string name="preferences_button">偏好設定</string> 
+  <string name="whats_new">* 長壓檔案或資料夾來分享 URLs \n* 新的偏好設定允許上載.</string> 
+  <string name="whats_new_title">有什麼新的</string> 
+  <string name="set_password_title">設定密碼</string> 
+  </resources>
