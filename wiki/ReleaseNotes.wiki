@@ -1,7 +1,7 @@
 #summary Release Notes
 
 = 1.0b Beta =
-Date: Not Yet Released
+Date: 2009-12-31
    * Add optional password protection.
    * Automatically create and serve MP3 playlists (.m3u file).
    * Add the contents of an entire folder to a shared folder.
