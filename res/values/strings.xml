@@ -33,7 +33,7 @@
 <string name="shareurl_title">Share</string>
 <string name="preferences_button">Preferences</string>
 
-<string name="whats_new">* Share URLs by long pressing on files or folders.\n* New preferences to allow uploads.</string>
+<string name="whats_new">* Optional password protection.\n* Automatic MP3 Playlists.\n* Add contents of entire folder by long press.\n* Download entire shared folder as ZIP.\n*French and Chinese translations.</string>
 <string name="whats_new_title">What's New</string>
 <string name="set_password_title">Set Password</string>
 </resources>

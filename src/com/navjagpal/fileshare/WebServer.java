@@ -107,6 +107,25 @@ public class WebServer {
           public void run() {
             handleRequest(socket);
           }
+
+          public void runWebServer() {
+            while (true) {
+              Log.i(TAG, "Running main webserver thread");
+              try {
+                final Socket socket = mServerSocket.accept();
+                Log.d(TAG, "Socket accepted");
+                Thread t = new Thread() {
+                  @Override
+                  public void run() {
+                    handleRequest(socket);
+                  }
+                };
+                t.start();
+              } catch (IOException e) {
+                Log.e(TAG, "Problem accepting socket " + e.toString());
+              }
+            }
+          }
         };
         t.start();
       } catch (IOException e) {
