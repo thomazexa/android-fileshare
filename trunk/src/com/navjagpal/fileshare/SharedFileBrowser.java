@@ -47,7 +47,8 @@ public class SharedFileBrowser extends ListActivity {
 
     int folderId = Integer.parseInt(getIntent().getData().getPathSegments().get(1));
     String where = FileSharingProvider.Files.Columns.FOLDER_ID + "=" + folderId;
-    Cursor c = managedQuery(FileSharingProvider.Files.CONTENT_URI, null, where, null, null);
+    Cursor c = managedQuery(FileSharingProvider.Files.CONTENT_URI, null, where, null,
+    		FileSharingProvider.Files.Columns.DISPLAY_NAME + " ASC");
     changeCursor(c);
 
     // Inform the list we provide context menus for items

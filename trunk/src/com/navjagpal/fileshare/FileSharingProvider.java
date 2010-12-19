@@ -282,7 +282,7 @@ public class FileSharingProvider extends ContentProvider {
 
     // Get the database and run the query
     SQLiteDatabase db = mOpenHelper.getReadableDatabase();
-    Cursor c = qb.query(db, projection, selection, selectionArgs, null, null, null);
+    Cursor c = qb.query(db, projection, selection, selectionArgs, null, null, sortOrder);
 
     // Tell the cursor what uri to watch, so it knows when its source data changes
     c.setNotificationUri(getContext().getContentResolver(), uri);
