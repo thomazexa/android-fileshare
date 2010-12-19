@@ -26,7 +26,6 @@ import android.database.MergeCursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.OpenableColumns;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.MenuItem;
 import android.view.View;
@@ -150,16 +149,6 @@ public class FileBrowser extends ListActivity {
         break;
     }
     return false;
-  }
-
-  private void shareAllFilesUnder(Uri uri) {
-    Cursor c = managedQuery(
-        uri, new String[] {OpenableColumns.DISPLAY_NAME},
-        null, null, null);
-    while (c.moveToNext()) {
-      Log.i("FileShare", "Add uri " + c.getString(c.getColumnIndex(
-          OpenableColumns.DISPLAY_NAME)));
-    }
   }
 
   @Override

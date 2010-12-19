@@ -16,6 +16,10 @@ package com.navjagpal.fileshare;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 
 import android.content.ContentProvider;
@@ -77,10 +81,11 @@ public class FileProvider extends ContentProvider {
   }
 
   /* Add a row to the matrix cursor */
-  private void addRow(MatrixCursor cursor, File file, int id, String path) {
+  private void addRow(Collection<Object[]> fileList, File file, int id,
+		  String path) {
     String fileName = file.getName();
     int fileSize = (int)file.length();
-    cursor.addRow(new Object[] {id, fileName, fileSize, path});
+    fileList.add(new Object[] {id, fileName, fileSize, path});
   }
 
   /* Return a cursor for files in the specified path */
@@ -93,20 +98,30 @@ public class FileProvider extends ContentProvider {
         "_data"
     };
 
-    MatrixCursor c = new MatrixCursor(columns);
-
     File baseDir = new File(path);
+    LinkedList<Object[]> fileList = new LinkedList<Object[]>();
     if (baseDir.isDirectory()) {
       File[] files = baseDir.listFiles();
       int id = 0;
       for (File file: files) {		
-        addRow(c, file, id, file.getAbsolutePath());
+        addRow(fileList, file, id, file.getAbsolutePath());
         id++;
       }
     } else if (baseDir.isFile()) {
-      addRow(c, baseDir, 0, baseDir.getAbsolutePath());
+      addRow(fileList, baseDir, 0, baseDir.getAbsolutePath());
     }
-
+   
+    // Sort listing by display name.
+    Collections.sort(fileList, new Comparator<Object[]>() {
+    	public int compare(Object[] r1, Object[] r2) {
+    		return ((String) r1[1]).compareTo((String) r2[2]);
+    	}
+    });
+    
+    MatrixCursor c = new MatrixCursor(columns);
+    for (Object[] row : fileList) {
+    	c.addRow(row);
+    }
     return c;
   }
 
