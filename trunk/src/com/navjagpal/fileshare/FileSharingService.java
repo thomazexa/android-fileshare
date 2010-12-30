@@ -35,12 +35,16 @@ public class FileSharingService extends Service {
   static final String PREFS_ALLOW_UPLOADS = "ALLOW_UPLOADS";
   public static String PREFS_REQUIRE_LOGIN = "REQUIRE_LOGIN";
   public static String PREFS_PASSWORD = "PASSWORD";
+  public static final String PREFS_SERVICE_ON_STARTUP = "SERVICE_ON_STARTUP";
+
 
   private static final int DEFAULT_PORT = 9999;
 
   private static final String TAG = "FileSharerService";
 
   private WebServer mWebServer;
+  
+  private Thread mWebServerThread;
 
   private int mPort;
 
@@ -77,16 +81,29 @@ public class FileSharingService extends Service {
       Log.e(TAG, "Problem creating server socket " + e.toString());
     }
 
-    Thread t = new Thread() {
+    mWebServerThread = new Thread() {
       @Override
       public void run() {
         mWebServer.runWebServer();
       }
     };
-    t.start();
+    mWebServerThread.start();
     Log.i(TAG, "Started webserver");
   }
 
+  @Override
+  public void onDestroy() {
+	  super.onDestroy();
+	  if (mWebServer != null) {
+		  mWebServerThread.interrupt();
+		  try {
+			  mWebServerThread.join();
+		  } catch (InterruptedException e) {
+			  
+		  }
+	  }
+  }
+  
   @Override
   public IBinder onBind(Intent intent) {
     if (IFileSharingService.class.getName().equals(intent.getAction())) {
