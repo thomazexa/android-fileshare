@@ -41,6 +41,15 @@ android:text="@string/help_button"
 >
 </Button>
 
+<ToggleButton
+android:id="@+id/service"
+android:layout_width="fill_parent"
+android:layout_height="wrap_content"
+android:textOn="@string/service_button_on"
+android:textOff="@string/service_button_off"
+>
+</ToggleButton>
+
 <LinearLayout android:orientation="horizontal"
 android:layout_width="fill_parent"
 android:layout_height="wrap_content"

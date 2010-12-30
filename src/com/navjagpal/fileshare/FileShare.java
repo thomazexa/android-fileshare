@@ -39,8 +39,11 @@ import android.provider.OpenableColumns;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 public class FileShare extends Activity {
 
@@ -82,10 +85,36 @@ public class FileShare extends Activity {
 
     setContentView(R.layout.main);
 
-    /* Startup the FileSharingService */
-    Intent serviceIntent = new Intent();
-    serviceIntent.setAction("com.navjagpal.filesharer.IFileSharingService");
-    startService(serviceIntent);
+    /* Startup the FileSharingService, unless the last state was off. */
+    final SharedPreferences sharedPreferences = getSharedPreferences(
+            FileSharingService.PREFS_NAME, MODE_PRIVATE);
+    ToggleButton serviceButton = (ToggleButton) findViewById(R.id.service);
+    if (sharedPreferences.getBoolean(
+    		FileSharingService.PREFS_SERVICE_ON_STARTUP, true)) {  
+	    Intent serviceIntent = new Intent();
+	    serviceIntent.setAction("com.navjagpal.filesharer.IFileSharingService");
+	    startService(serviceIntent);
+	    serviceButton.setChecked(true);
+    } else {
+    	serviceButton.setChecked(false);
+    }
+    
+    /* Setup toggling the service. */
+    serviceButton.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+		@Override
+		public void onCheckedChanged(CompoundButton arg0, boolean newValue) {
+			Intent serviceIntent = new Intent();
+		    serviceIntent.setAction("com.navjagpal.filesharer.IFileSharingService");
+			if (newValue == true) {
+			    startService(serviceIntent);
+			} else {
+				stopService(serviceIntent);
+			}
+		    SharedPreferences.Editor editor = sharedPreferences.edit();
+		    editor.putBoolean(FileSharingService.PREFS_SERVICE_ON_STARTUP, newValue);
+		    editor.commit();
+		}
+    });
 
     /* Add the add file to shared folder */
     Button addFileButton = (Button) findViewById(R.id.addfile);
@@ -101,8 +130,6 @@ public class FileShare extends Activity {
 
     /* Preferences button */
     Button preferencesButton = (Button) findViewById(R.id.preferences);
-    final SharedPreferences sharedPreferences = getSharedPreferences(
-        FileSharingService.PREFS_NAME, MODE_PRIVATE);
     preferencesButton.setOnClickListener(new View.OnClickListener() {
       public void onClick(View v) {
         AlertDialog.Builder builder = new AlertDialog.Builder(FileShare.this);

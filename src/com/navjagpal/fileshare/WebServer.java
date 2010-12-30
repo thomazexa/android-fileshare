@@ -38,9 +38,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.net.ServerSocket;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.URLDecoder;
+import java.nio.channels.ClosedByInterruptException;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -56,8 +59,8 @@ public class WebServer {
   private static final String TAG = "FileSharer WebServer";
 
   private int mPort;
-
-  private ServerSocket mServerSocket;
+  
+  private ServerSocketChannel mServerSocketChannel;
   
   private Context mContext;
 
@@ -79,8 +82,9 @@ public class WebServer {
       SharedPreferences sharedPreferences, SQLiteDatabase cookiesDatabase,
       int port) throws IOException {
     mPort = port;
-    mServerSocket = new ServerSocket(mPort);
-    mServerSocket.setReuseAddress(true);
+    mServerSocketChannel = ServerSocketChannel.open();
+    mServerSocketChannel.socket().setReuseAddress(true);
+    mServerSocketChannel.socket().bind(new InetSocketAddress(mPort));
     mContext = context;
     mSharedPreferences = sharedPreferences;
     mCookiesDatabase = cookiesDatabase;
@@ -100,17 +104,22 @@ public class WebServer {
     while (true) {
       Log.i(TAG, "Running main webserver thread");
       try {
-        final Socket socket = mServerSocket.accept();
+    	SocketChannel channel = mServerSocketChannel.accept();
+        final Socket socket = channel.socket();
         Log.d(TAG, "Socket accepted");
         Thread t = new Thread() {
           @Override
           public void run() {
-            handleRequest(socket);
+        	  handleRequest(socket);
           }
         };
         t.start();
+      } catch (ClosedByInterruptException e) {
+    	Log.i(TAG, "Received interrupt to shutdown.");
+    	return;
       } catch (IOException e) {
-        Log.e(TAG, "Problem accepting socket " + e.toString());
+        Log.e(TAG, "Unexpected error, shutting down. " + e.toString());
+        return;
       }
     }
   }
